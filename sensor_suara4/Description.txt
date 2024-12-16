@@ -1,0 +1,108 @@
+### **Deskripsi Project: Sistem Lampu Otomatis Menggunakan Sensor Tepukan dan Saklar Manual**
+
+**Project ini merupakan implementasi sederhana untuk mengontrol lampu secara otomatis menggunakan sensor tepukan dan saklar manual.** Berikut adalah penjelasan detail mengenai kode program yang digunakan:
+
+---
+
+### **Fungsi Utama**
+1. **Kontrol Lampu Otomatis**  
+   - Lampu dikendalikan menggunakan **sensor tepukan** yang mendeteksi bunyi tepukan tangan.  
+   - Tersedia juga **saklar manual** sebagai alternatif untuk menghidupkan atau mematikan lampu.
+
+2. **Toggle Status Lampu**  
+   - Setiap kali sensor mendeteksi tepukan atau saklar manual ditekan, status lampu akan **berubah (toggle)** antara **ON** dan **OFF**.
+
+---
+
+### **Komponen yang Digunakan**
+- **Sensor Tepukan**: Menggunakan Sensor Suara KY-037 Terhubung ke pin **D2** (mendeteksi suara tepukan tangan).  
+- **Relay**: Terhubung ke pin **D13** (mengontrol ON/OFF lampu).  
+- **Saklar Manual**: Terhubung ke pin **D3** dengan **internal pull-up resistor** aktif.  
+- **Lampu**: Dikendalikan melalui relay (ON/OFF).
+
+---
+
+### **Penjelasan Kode Program**
+
+1. **Deklarasi Pin dan Variabel**
+   - **`sensorPin`**: Pin untuk sensor tepukan.  
+   - **`relayPin`**: Pin untuk relay yang mengontrol lampu.  
+   - **`switchPin`**: Pin untuk saklar manual.  
+   - Variabel **`sensorState`** dan **`switchState`** digunakan untuk menyimpan status pembacaan dari sensor dan saklar.  
+   - **`lampState`** menyimpan status lampu (ON/OFF) dan digunakan untuk melakukan toggle.
+
+   ```cpp
+   const int sensorPin = 2;    // Pin sensor tepukan
+   const int relayPin = 13;    // Pin relay
+   const int switchPin = 3;    // Pin saklar manual
+   ```
+
+2. **Inisialisasi dalam `setup()`**
+   - Pin **sensor** dan **saklar** diatur sebagai **INPUT**, sementara pin **relay** diatur sebagai **OUTPUT**.  
+   - **Internal pull-up resistor** digunakan untuk saklar manual agar tidak memerlukan resistor eksternal.  
+   - Lampu dimatikan di awal program, dan komunikasi **Serial** diinisialisasi untuk debugging.
+
+   ```cpp
+   void setup() {
+     pinMode(sensorPin, INPUT);
+     pinMode(relayPin, OUTPUT);
+     pinMode(switchPin, INPUT_PULLUP);  // Mengaktifkan pull-up resistor
+     digitalWrite(relayPin, LOW);       // Lampu mati pada awalnya
+     Serial.begin(9600);
+     Serial.println("Lampu otomatis siap.");
+   }
+   ```
+
+3. **Logika Kontrol Lampu dalam `loop()`**
+   - **Sensor Tepukan**  
+     Jika sensor mendeteksi tepukan (**`sensorState == HIGH`**):  
+     - Status lampu **di-toggle** (berubah dari ON ke OFF atau sebaliknya).  
+     - Lampu dikendalikan melalui **relay**.  
+     - Informasi status lampu ditampilkan melalui komunikasi Serial.
+
+   ```cpp
+   if (sensorState == HIGH) { 
+     delay(100); // Debouncing
+     lampState = !lampState; // Toggle lampu
+     digitalWrite(relayPin, lampState ? HIGH : LOW);
+     Serial.print("Sensor Tepukan: ");
+     Serial.println(lampState ? "Lampu Menyala" : "Lampu Mati");
+     while(digitalRead(sensorPin) == HIGH); // Tunggu tepukan berakhir
+   }
+   ```
+
+   - **Saklar Manual**  
+     Jika saklar ditekan (**`switchState == LOW`**):  
+     - Sama seperti sensor, status lampu di-toggle dan informasi ditampilkan melalui Serial.  
+     - Program menunggu hingga saklar dilepas sebelum lanjut membaca input baru.
+
+   ```cpp
+   if (switchState == LOW) {
+     delay(100); // Debouncing
+     lampState = !lampState; // Toggle lampu
+     digitalWrite(relayPin, lampState ? HIGH : LOW);
+     Serial.print("Saklar Manual: ");
+     Serial.println(lampState ? "Lampu Menyala" : "Lampu Mati");
+     while(digitalRead(switchPin) == LOW); // Tunggu saklar dilepas
+   }
+   ```
+
+4. **Debouncing**  
+   Digunakan **`delay(100)`** untuk mencegah pembacaan ganda akibat noise atau getaran dari sensor tepukan dan saklar manual.
+
+---
+
+### **Kelebihan Project**
+1. **Kombinasi Kontrol**: Lampu bisa dikendalikan secara otomatis dengan tepukan atau manual menggunakan saklar.
+2. **Efisiensi Hardware**: Menggunakan internal pull-up resistor untuk saklar manual sehingga tidak memerlukan resistor eksternal.
+3. **User Friendly**: Responsif dan mudah digunakan.
+
+---
+
+### **Hasil Akhir**
+- Tepukan tangan atau penekanan saklar manual akan **menghidupkan** atau **mematikan lampu** secara otomatis.
+- Status lampu ditampilkan melalui Serial Monitor untuk debugging.
+
+---
+
+Kode ini cocok untuk proyek **smart home** sederhana yang memperkenalkan kontrol otomatisasi menggunakan sensor suara dan saklar manual.
